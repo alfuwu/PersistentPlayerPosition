@@ -14,12 +14,12 @@ Configs: {
 
 		SavePositionWhenEnteringSubworld: {
 			Label: Save Position When Entering Subworld
-			Tooltip: Saves your position in the main world
+			Tooltip: Saves your position in the main world when you enter a subworld through any means
 		}
 
 		ReturnToPrevPositionWhenExitingSubworld: {
 			Label: Return To Prev Position When Exiting Subworld
-			Tooltip: ""
+			Tooltip: Returns you to your saved position in the main world when you go back to it
 		}
 	}
 }
