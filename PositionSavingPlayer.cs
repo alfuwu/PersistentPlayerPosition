@@ -1,5 +1,4 @@
 ﻿using Microsoft.Xna.Framework;
-using Stubble.Core.Classes;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Terraria;

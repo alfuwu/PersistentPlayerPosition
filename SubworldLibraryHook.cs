@@ -10,13 +10,13 @@ namespace PersistentPlayerPosition {
         private static Mod SubworldLibrary => ModLoader.GetMod("SubworldLibrary");
         private static Hook beginEnteringHook = null;
         private static Hook exitWorldCallbackHook = null;
-        private static FieldInfo CurrentSubworldField = null;
+        private static FieldInfo currentSubworldField = null;
 
         private delegate void orig_BeginEntering(int index);
         private delegate void orig_ExitWorldCallback(object index);
         
         private static void OnBeginEntering(orig_BeginEntering orig, int index) {
-            if (CurrentSubworldField != null && CurrentSubworldField.GetValue(null) == null && ModContent.GetInstance<PPPConfig>().SavePositionWhenEnteringSubworld)
+            if (currentSubworldField != null && currentSubworldField.GetValue(null) == null && ModContent.GetInstance<PPPConfig>().SavePositionWhenEnteringSubworld)
                 Main.LocalPlayer.GetModPlayer<PositionSavingPlayer>().UpdateData(null);
             orig(index);
         }
@@ -42,7 +42,7 @@ namespace PersistentPlayerPosition {
                 if (subworldSystem != null) {
                     beginEnteringInfo = subworldSystem.GetMethod("BeginEntering", BindingFlags.NonPublic | BindingFlags.Static);
                     exitWorldCallbackInfo = subworldSystem.GetMethod("ExitWorldCallback", BindingFlags.NonPublic | BindingFlags.Static);
-                    CurrentSubworldField = subworldSystem.GetField("current", BindingFlags.NonPublic | BindingFlags.Static);
+                    currentSubworldField = subworldSystem.GetField("current", BindingFlags.NonPublic | BindingFlags.Static);
                 }
                 if (beginEnteringInfo != null) {
                     beginEnteringHook = new Hook(beginEnteringInfo, OnBeginEntering);
