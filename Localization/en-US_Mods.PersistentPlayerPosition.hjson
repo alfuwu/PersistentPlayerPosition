@@ -1,1 +1,25 @@
+Configs: {
+	PPPConfig: {
+		DisplayName: PPP Config
 
+		UseUniqueIdForWorldIdentification: {
+			Label: Use Unique ID for World Identification
+			Tooltip: Uses a world's UUID for indentification instead of a world's seed + its name
+		}
+
+		Headers: {
+			General: General
+			Subworlds: Subworlds
+		}
+
+		SavePositionWhenEnteringSubworld: {
+			Label: Save Position When Entering Subworld
+			Tooltip: Saves your position in the main world
+		}
+
+		ReturnToPrevPositionWhenExitingSubworld: {
+			Label: Return To Prev Position When Exiting Subworld
+			Tooltip: ""
+		}
+	}
+}

@@ -1,6 +1,7 @@
 displayName = Persistent Player Position
 author = alfuwu
-version = 1.1
+version = 1.2
 hideCode = false
 hideResources = false
 includeSource = true
+weakReferences=SubworldLibrary
