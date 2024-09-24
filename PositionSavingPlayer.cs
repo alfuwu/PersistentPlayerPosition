@@ -24,7 +24,7 @@ namespace PersistentPlayerPosition {
         public override void OnEnterWorld() {
             Task.Run(async () => {
                 while (loadedNBT == null)
-                    await Task.Delay(1);
+                    await Task.Delay(1); // wait until NBT data is loaded
                 if (GetPlayerPos(loadedNBT, out Vector2 pos)) {
                     Player.position = pos;
                     Player.fallStart = (int) pos.Y / 16; // prevent taking fall dmg when spawning at lower positions

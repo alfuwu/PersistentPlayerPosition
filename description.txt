@@ -3,8 +3,16 @@ Persistent Player Position (PPP :p) is a mod that saves the player's position wh
 The mod functions off of a per-player per-world basis, allowing every character you have to have their own positions in a single world.
 
 I am aware of another mod that functions similarly (named Save Your Position), which saves the player's position and loads it upon entering a world. However, that mod has a few, albeit minor, issues that this one does not.
+
 The first issue is that, upon loading up a world, the minimap/map would show the player temporarily being at their spawnpoint until Save Your Position moves them to their last saved position.
+
 The second issue is that Save Your Position does not account for whether or not the player is dead when saving their position, allowing the player to die, exit the world before respawning, and rejoin where they died. This, alone, would not be much of an issue as dropped items are not persistent, so you would lose all the items you dropped upon death. However, there are mods that make dropped items persistent, which means you could easily reclaim all your lost items by simply exiting and rejoining, negating the penalty of death outside of a boss fight.
+
 The third issue is not much of an issue, but can be rather limiting. Save Your Position only uses the world's seed to identify which saved player position it should use when moving the player to their last saved position. This means that if you used two worlds with the same seed, your location would persist across both of them, not just one. PPP uses both the word seed and name, allowing for more flexibility while still retaining the ability to have your position apply to multiple worlds at once ('cause it is kinda cool). An alternative to using the world seed and world name would be to assign a UUID (universally unique identifier) to each world instead, however that would be too much work for such a negligible amount of gain.
+Edit: Nvm I added the option to use UUIDs anyway. Didn't know worlds had a UUID field, but they do, so there you go. You can enable it in the mod's config.
+
+The fourth (and final) issue is that Save Your Position does not provide compatibility with the Subworlds Library. This mod (as of Sep 20, 2024) does, returning you to your position in the main world when exiting a subworld. This behavior can be disabled in the config if you so desire.
+
+Oh, there's also an older position saving mod called "Player Location Saving", however this mod is outdated and uses vanilla Terraria's Teleport function, which makes particles and plays a sound, ruining any chance of having a seamless transition to where you left off.
 
 Hope you enjoy :)

@@ -45,11 +45,11 @@ namespace PersistentPlayerPosition {
                     currentSubworldField = subworldSystem.GetField("current", BindingFlags.NonPublic | BindingFlags.Static);
                 }
                 if (beginEnteringInfo != null) {
-                    beginEnteringHook = new Hook(beginEnteringInfo, OnBeginEntering);
+                    beginEnteringHook = new(beginEnteringInfo, OnBeginEntering);
                     beginEnteringHook.Apply();
                 }
                 if (exitWorldCallbackInfo != null) {
-                    exitWorldCallbackHook = new Hook(exitWorldCallbackInfo, OnExitWorldCallback);
+                    exitWorldCallbackHook = new(exitWorldCallbackInfo, OnExitWorldCallback);
                     exitWorldCallbackHook.Apply();
                 }
             }
