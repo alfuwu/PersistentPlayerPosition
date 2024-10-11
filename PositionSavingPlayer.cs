@@ -1,7 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
-using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Threading.Tasks;
 using Terraria;
 using Terraria.DataStructures;
@@ -11,6 +9,13 @@ using Terraria.ModLoader.IO;
 namespace PersistentPlayerPosition {
     public class PositionSavingPlayer : ModPlayer {
         public TagCompound LoadedNBT { get; private set; }
+
+        public override void OnEnterWorld() { // some insurance
+            if (LoadedNBT != null && PersistentPlayerPosition.GetPlayerPos(LoadedNBT, out Vector2 pos)) {
+                Player.position = pos;
+                Player.fallStart = (int)pos.Y / 16;
+            }
+        }
 
         public override void SaveData(TagCompound tag) {
             if (LoadedNBT != null)
