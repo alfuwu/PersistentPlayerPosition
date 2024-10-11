@@ -3,8 +3,6 @@ using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
 using System.ComponentModel;
-using System.Reflection;
-using System.Threading.Tasks;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
@@ -24,26 +22,31 @@ namespace PersistentPlayerPosition {
             IL_Player.Spawn -= Spawn;
         }
 
+        public static Vector2? GetPlayerPos(TagCompound tag) {
+            if (tag == null)
+                return null;
+            if (tag.TryGet("pos:" + Main.worldID + ":" + Main.worldName, out Vector2 pos))
+                return pos;
+            else if (ModContent.GetInstance<PPPConfig>().UseUniqueIdForWorldIdentification && tag.TryGet("pos:" + Main.ActiveWorldFileData.UniqueId, out Vector2 pos2))
+                return pos2;
+            return null;
+        }
+
         private void Spawn(ILContext il) {
             try {
                 ILCursor c = new(il);
                 c.GotoNext(MoveType.After, i => i.MatchStloc1());
                 ILLabel vanilla = il.DefineLabel();
-                c.Emit(OpCodes.Ldarg_0); // load player var
-                c.Emit(OpCodes.Ldarg_1);
-                c.EmitDelegate(async (Player p, PlayerSpawnContext context) => {
-                    return await Task.Run(async () => {
-                        TagCompound loadedNBT = p.GetModPlayer<PositionSavingPlayer>().LoadedNBT;
-                        while (loadedNBT == null)
-                            await Task.Delay(1); // wait until NBT data is loaded
-                        if (context == PlayerSpawnContext.SpawningIntoWorld && PositionSavingPlayer.GetPlayerPos(p.GetModPlayer<PositionSavingPlayer>().LoadedNBT, out Vector2 vec)) {
-                            p.position = vec;
-                            return true;
-                        }
-                        return false;
-                    });
-                });
+                c.Emit(OpCodes.Ldarg_1); // load PlayerSpawnContext
+                c.EmitDelegate((PlayerSpawnContext context) => context == PlayerSpawnContext.SpawningIntoWorld);
                 c.Emit(OpCodes.Brfalse_S, vanilla);
+                c.Emit(OpCodes.Ldarg_0); // load player var
+                c.EmitDelegate((Player player) => GetPlayerPos(player.GetModPlayer<PositionSavingPlayer>().LoadedNBT).HasValue);
+                c.Emit(OpCodes.Brfalse_S, vanilla);
+                c.Emit(OpCodes.Ldarg_0);
+                c.EmitDelegate((Player player) => {
+                    player.position = GetPlayerPos(player.GetModPlayer<PositionSavingPlayer>().LoadedNBT).Value;
+                });
                 ILLabel skipPositionSetting = il.DefineLabel();
                 c.Emit(OpCodes.Br_S, skipPositionSetting);
                 c.MarkLabel(vanilla);
