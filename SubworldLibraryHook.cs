@@ -1,4 +1,5 @@
-﻿using MonoMod.RuntimeDetour;
+﻿using Microsoft.Xna.Framework;
+using MonoMod.RuntimeDetour;
 using System;
 using System.Reflection;
 using Terraria;
@@ -23,8 +24,8 @@ namespace PersistentPlayerPosition {
 
         private static void OnExitWorldCallback(orig_ExitWorldCallback orig, object index) {
             // going to main world
-            if ((index == null || (int) index < 0) && ModContent.GetInstance<PPPConfig>().ReturnToPrevPositionWhenExitingSubworld)
-                Main.LocalPlayer.GetModPlayer<PositionSavingPlayer>().OnEnterWorld();
+            if ((index == null || (int)index < 0) && ModContent.GetInstance<PPPConfig>().ReturnToPrevPositionWhenExitingSubworld && PositionSavingPlayer.GetPlayerPos(Main.LocalPlayer.GetModPlayer<PositionSavingPlayer>().LoadedNBT, out Vector2 vec))
+                Main.LocalPlayer.position = vec;
             // i have no idea how nice this will play in multiplayer, but fingers crossed it actually works as intended there
             orig(index);
         }
