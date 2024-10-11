@@ -1,7 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading.Tasks;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
@@ -16,17 +19,8 @@ namespace PersistentPlayerPosition {
             UpdateData(tag);
         }
 
-        public override void OnEnterWorld() {
-            Task.Run(async () => {
-                while (LoadedNBT == null)
-                    await Task.Delay(1); // wait until NBT data is loaded
-                Vector2? pos = PersistentPlayerPosition.GetPlayerPos(LoadedNBT);
-                if (pos.HasValue) {
-                    Player.position = pos.Value;
-                    Player.fallStart = (int)pos.Value.Y / 16; // prevent taking fall dmg when spawning at lower positions
-                }
-            });
-        }
+        // prevent players from dying in dont dig up/zenith seed bc they're out of bounds
+        public override bool PreKill(double damage, int hitDirection, bool pvp, ref bool playSound, ref bool genDust, ref PlayerDeathReason damageSource) => Player.whoAmI == Main.myPlayer && (LoadedNBT != null || Player.position.X + Player.position.Y > 0);
 
         public void UpdateData(TagCompound tag) {
             tag ??= LoadedNBT;
@@ -41,6 +35,9 @@ namespace PersistentPlayerPosition {
             }
         }
 
-        public override void LoadData(TagCompound tag) => LoadedNBT = tag;
+        public override void LoadData(TagCompound tag) {
+            LoadedNBT = tag;
+            LoadedNBT ??= []; // insurance, in case tag is null for whatever reason (dont want to make players immortal)
+        }
     }
 }
