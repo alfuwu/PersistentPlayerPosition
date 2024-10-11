@@ -30,5 +30,11 @@ namespace PersistentPlayerPosition {
 
         [DefaultValue(true)]
         public bool ReturnToPrevPositionWhenExitingSubworld { get; set; }
+
+        [DefaultValue(true)]
+        public bool SavePositionInSubworlds { get; set; }
+
+        [DefaultValue(false)]
+        public bool SavePositionInNonPersistentSubworlds { get; set; }
     }
 }

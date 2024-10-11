@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Stubble.Core.Classes;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Terraria;
@@ -21,11 +22,31 @@ namespace PersistentPlayerPosition {
             return false;
         }
 
+        private static bool GetPlayerSubworldPos(TagCompound tag, out Vector2 vec, string subworldName) {
+            if (tag.TryGet("spos:" + subworldName, out Vector2 pos)) {
+                vec = pos;
+                return true;
+            }
+            vec = default;
+            return false;
+        }
+
         public override void OnEnterWorld() {
             Task.Run(async () => {
                 while (loadedNBT == null)
                     await Task.Delay(1); // wait until NBT data is loaded
                 if (GetPlayerPos(loadedNBT, out Vector2 pos)) {
+                    Player.position = pos;
+                    Player.fallStart = (int) pos.Y / 16; // prevent taking fall dmg when spawning at lower positions
+                }
+            });
+        }
+
+        public void OnEnterSubworld(string subworldName) {
+            Task.Run(async () => {
+                while (loadedNBT == null)
+                    await Task.Delay(1); // wait until NBT data is loaded
+                if (GetPlayerSubworldPos(loadedNBT, out Vector2 pos, subworldName)) {
                     Player.position = pos;
                     Player.fallStart = (int) pos.Y / 16; // prevent taking fall dmg when spawning at lower positions
                 }
@@ -39,16 +60,27 @@ namespace PersistentPlayerPosition {
             UpdateData(tag);
         }
 
-        public void UpdateData(TagCompound tag) {
+        public void UpdateData(TagCompound tag = null) {
             tag ??= loadedNBT;
-            if (Player.dead) {
-                tag.Remove("pos:" + Main.ActiveWorldFileData.UniqueId);
-                tag.Remove("pos:" + Main.worldID + ":" + Main.worldName);
-            } else {
-                if (ModContent.GetInstance<PPPConfig>().UseUniqueIdForWorldIdentification)
-                    tag["pos:" + Main.ActiveWorldFileData] = Player.position;
+            if (tag != null) {
+                if (Player.dead) {
+                    tag.Remove("pos:" + Main.ActiveWorldFileData.UniqueId);
+                    tag.Remove("pos:" + Main.worldID + ":" + Main.worldName);
+                } else {
+                    if (ModContent.GetInstance<PPPConfig>().UseUniqueIdForWorldIdentification)
+                        tag["pos:" + Main.ActiveWorldFileData] = Player.position;
+                    else
+                        tag["pos:" + Main.worldID + ":" + Main.worldName] = Player.position;
+                }
+            }
+        }
+
+        public void UpdateSubworldData(string subworldID) {
+            if (loadedNBT != null) {
+                if (Player.dead)
+                    loadedNBT.Remove("spos:" + subworldID);
                 else
-                    tag["pos:" + Main.worldID + ":" + Main.worldName] = Player.position;
+                    loadedNBT["spos:" + subworldID] = Player.position;
             }
         }
 

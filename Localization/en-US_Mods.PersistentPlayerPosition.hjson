@@ -21,5 +21,15 @@ Configs: {
 			Label: Return To Prev Position When Exiting Subworld
 			Tooltip: Returns you to your saved position in the main world when you go back to it
 		}
+
+		SavePositionInSubworlds: {
+			Label: Save Position In Subworlds
+			Tooltip: ""
+		}
+
+		SavePositionInNonPersistentSubworlds: {
+			Label: Save Position In Non Persistent Subworlds
+			Tooltip: ""
+		}
 	}
 }
