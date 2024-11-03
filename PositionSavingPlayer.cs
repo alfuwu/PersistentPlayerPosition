@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
@@ -25,7 +24,7 @@ namespace PersistentPlayerPosition {
         }
 
         // prevent players from dying in dont dig up/zenith seed bc they're out of bounds
-        public override bool PreKill(double damage, int hitDirection, bool pvp, ref bool playSound, ref bool genDust, ref PlayerDeathReason damageSource) => Player.whoAmI == Main.myPlayer && (LoadedNBT != null || Player.position.X + Player.position.Y > 0);
+        public override bool PreKill(double damage, int hitDirection, bool pvp, ref bool playSound, ref bool genDust, ref PlayerDeathReason damageSource) => LoadedNBT != null || Player.position.X + Player.position.Y > 0;
 
         public void UpdateData(TagCompound tag) {
             tag ??= LoadedNBT;

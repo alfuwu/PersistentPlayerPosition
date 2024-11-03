@@ -1,7 +1,6 @@
 using Microsoft.Xna.Framework;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using Stubble.Core.Classes;
 using System;
 using System.ComponentModel;
 using System.Reflection;
