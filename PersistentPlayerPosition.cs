@@ -25,11 +25,12 @@ namespace PersistentPlayerPosition {
         }
 
         public static bool GetPlayerPos(TagCompound tag, out Vector2 vec) {
-            if (tag.TryGet("pos:" + Main.worldID + ":" + Main.worldName, out Vector2 pos)) {
-                vec = pos;
-                return true;
-            } else if (ModContent.GetInstance<PPPConfig>().UseUniqueIdForWorldIdentification && tag.TryGet("pos:" + Main.ActiveWorldFileData.UniqueId, out Vector2 pos2)) {
+            Console.WriteLine(Main.ActiveWorldFileData.UniqueId.ToString());
+            if (ModContent.GetInstance<PPPConfig>().UseUniqueIdForWorldIdentification && tag.TryGet("pos:" + Main.ActiveWorldFileData.UniqueId.ToString(), out Vector2 pos2)) {
                 vec = pos2;
+                return true;
+            } else if (tag.TryGet("pos:" + Main.worldID + ":" + Main.worldName, out Vector2 pos)) {
+                vec = pos;
                 return true;
             }
             vec = default;
@@ -43,6 +44,7 @@ namespace PersistentPlayerPosition {
                 typeof(Player).GetMethod("Spawn_SetPosition", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(player, [player.SpawnX, player.SpawnY]);
             else
                 typeof(Player).GetMethod("Spawn_SetPositionAtWorldSpawn", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(player, []);
+            player.fallStart = (int)player.position.Y / 16;
         }
 
         private void Spawn(ILContext il) {
@@ -56,13 +58,14 @@ namespace PersistentPlayerPosition {
                 c.Emit(OpCodes.Ldarg_0);
                 c.EmitDelegate((Player player) => {
                     PositionSavingPlayer p = player.GetModPlayer<PositionSavingPlayer>();
-                    if (p.LoadedNBT == null)
+                    if (p.LoadedNBT == null) {
                         Task.Run(async () => {
-                            while (p.LoadedNBT == null)
+                            int attempts = 0;
+                            while (p.LoadedNBT == null && attempts++ < 1000)
                                 await Task.Delay(1);
                             SetPosition(player, p.LoadedNBT);
                         });
-                    else
+                    } else
                         SetPosition(player, p.LoadedNBT);
                 });
                 ILLabel skipPositionSetting = il.DefineLabel();
@@ -84,7 +87,7 @@ namespace PersistentPlayerPosition {
 
         [Header("General")]
 
-        [DefaultValue(false)]
+        [DefaultValue(true)]
         public bool UseUniqueIdForWorldIdentification { get; set; }
 
         [Header("Subworlds")]

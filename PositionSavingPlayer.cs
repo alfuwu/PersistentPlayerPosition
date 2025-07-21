@@ -1,5 +1,5 @@
-﻿using Microsoft.Xna.Framework;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
@@ -10,7 +10,9 @@ namespace PersistentPlayerPosition {
         public TagCompound LoadedNBT { get; private set; }
 
         public override void OnEnterWorld() { // some insurance
-            if (LoadedNBT != null && PersistentPlayerPosition.GetPlayerPos(LoadedNBT, out Vector2 pos)) {
+            LoadedNBT ??= [];
+
+            if (PersistentPlayerPosition.GetPlayerPos(LoadedNBT, out Vector2 pos)) {
                 Player.position = pos;
                 Player.fallStart = (int)pos.Y / 16;
             }
@@ -29,11 +31,11 @@ namespace PersistentPlayerPosition {
         public void UpdateData(TagCompound tag) {
             tag ??= LoadedNBT;
             if (Player.dead) {
-                tag.Remove("pos:" + Main.ActiveWorldFileData.UniqueId);
+                tag.Remove("pos:" + Main.ActiveWorldFileData.UniqueId.ToString());
                 tag.Remove("pos:" + Main.worldID + ":" + Main.worldName);
             } else {
                 if (ModContent.GetInstance<PPPConfig>().UseUniqueIdForWorldIdentification)
-                    tag["pos:" + Main.ActiveWorldFileData] = Player.position;
+                    tag["pos:" + Main.ActiveWorldFileData.UniqueId.ToString()] = Player.position;
                 else
                     tag["pos:" + Main.worldID + ":" + Main.worldName] = Player.position;
             }

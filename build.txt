@@ -1,6 +1,6 @@
 displayName = Persistent Player Position
 author = alfuwu
-version = 1.4
+version = 1.4.1
 hideCode = false
 hideResources = false
 includeSource = true
