@@ -25,7 +25,6 @@ namespace PersistentPlayerPosition {
         }
 
         public static bool GetPlayerPos(TagCompound tag, out Vector2 vec) {
-            Console.WriteLine(Main.ActiveWorldFileData.UniqueId.ToString());
             if (ModContent.GetInstance<PPPConfig>().UseUniqueIdForWorldIdentification && tag.TryGet("pos:" + Main.ActiveWorldFileData.UniqueId.ToString(), out Vector2 pos2)) {
                 vec = pos2;
                 return true;
