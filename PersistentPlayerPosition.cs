@@ -24,11 +24,11 @@ namespace PersistentPlayerPosition {
             IL_Player.Spawn -= Spawn;
         }
 
+        public static string TagId() =>
+            "pos:" + (ModContent.GetInstance<PPPConfig>().UseUniqueIdForWorldIdentification ? Main.ActiveWorldFileData.UniqueId.ToString() : Main.worldID + ":" + Main.worldName);
+
         public static bool GetPlayerPos(TagCompound tag, out Vector2 vec) {
-            if (ModContent.GetInstance<PPPConfig>().UseUniqueIdForWorldIdentification && tag.TryGet("pos:" + Main.ActiveWorldFileData.UniqueId.ToString(), out Vector2 pos2)) {
-                vec = pos2;
-                return true;
-            } else if (tag.TryGet("pos:" + Main.worldID + ":" + Main.worldName, out Vector2 pos)) {
+            if (tag.TryGet(TagId(), out Vector2 pos)) {
                 vec = pos;
                 return true;
             }
@@ -37,13 +37,15 @@ namespace PersistentPlayerPosition {
         }
 
         public static void SetPosition(Player player, TagCompound tag) {
-            if (GetPlayerPos(tag, out Vector2 vec))
+            if (GetPlayerPos(tag, out Vector2 vec)) // spawn player at their saved location
                 player.position = vec;
-            else if (player.SpawnX >= 0 && player.SpawnY >= 0)
+            else if (player.SpawnX >= 0 && player.SpawnY >= 0) // spawn player at their set spawn location
                 typeof(Player).GetMethod("Spawn_SetPosition", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(player, [player.SpawnX, player.SpawnY]);
-            else
+            else // spawn player at world spawn
                 typeof(Player).GetMethod("Spawn_SetPositionAtWorldSpawn", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(player, []);
-            player.fallStart = (int)player.position.Y / 16;
+            if (tag.TryGet(TagId(), out TagCompound tag2) && tag2.TryGet("facing", out int dir)) // make player face the direction they were facing when they logged off
+                player.ChangeDir(dir);
+            player.fallStart = (int)player.position.Y / 16; // prevent player from dying of fall damage
         }
 
         private void Spawn(ILContext il) {
@@ -52,10 +54,10 @@ namespace PersistentPlayerPosition {
                 c.GotoNext(MoveType.After, i => i.MatchStloc1());
                 ILLabel vanilla = il.DefineLabel();
                 c.Emit(OpCodes.Ldarg_1); // load PlayerSpawnContext
-                c.EmitDelegate((PlayerSpawnContext context) => context == PlayerSpawnContext.SpawningIntoWorld);
-                c.Emit(OpCodes.Brfalse_S, vanilla);
-                c.Emit(OpCodes.Ldarg_0);
-                c.EmitDelegate((Player player) => {
+                c.EmitDelegate((PlayerSpawnContext context) => context == PlayerSpawnContext.SpawningIntoWorld); // make sure that the player is loading in and not, for instance, respawning
+                c.Emit(OpCodes.Brfalse_S, vanilla); // skip custom logic if they aren't spawning
+                c.Emit(OpCodes.Ldarg_0); // load Player
+                c.EmitDelegate((Player player) => { // put player in their saved position
                     PositionSavingPlayer p = player.GetModPlayer<PositionSavingPlayer>();
                     if (p.LoadedNBT == null) {
                         Task.Run(async () => {
@@ -68,7 +70,7 @@ namespace PersistentPlayerPosition {
                         SetPosition(player, p.LoadedNBT);
                 });
                 ILLabel skipPositionSetting = il.DefineLabel();
-                c.Emit(OpCodes.Br_S, skipPositionSetting);
+                c.Emit(OpCodes.Br_S, skipPositionSetting); // skip vanilla logic
                 c.MarkLabel(vanilla);
                 c.GotoNext(i => i.MatchLdarg0(),
                     i => i.MatchLdcI4(0),

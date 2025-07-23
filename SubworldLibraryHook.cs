@@ -17,8 +17,11 @@ namespace PersistentPlayerPosition {
         private delegate void orig_ExitWorldCallback(object index);
         
         private static void OnBeginEntering(orig_BeginEntering orig, int index) {
-            if (currentSubworldField != null && currentSubworldField.GetValue(null) == null && ModContent.GetInstance<PPPConfig>().SavePositionWhenEnteringSubworld)
-                Main.LocalPlayer.GetModPlayer<PositionSavingPlayer>().UpdateData(null);
+            if (currentSubworldField != null && currentSubworldField.GetValue(null) == null)
+                if (ModContent.GetInstance<PPPConfig>().SavePositionWhenEnteringSubworld) // save the player's position in the main world
+                    Main.LocalPlayer.GetModPlayer<PositionSavingPlayer>().UpdateData(null);
+                else // delete the player's position in the main world, so that if they leave the game in the subworld they don't return to their last saved location
+                    Main.LocalPlayer.GetModPlayer<PositionSavingPlayer>().RemoveData(null);
             orig(index);
         }
 
@@ -41,6 +44,7 @@ namespace PersistentPlayerPosition {
                         subworldSystem = t;
 
                 if (subworldSystem != null) {
+                    // use reflection to get some required methods & fields
                     beginEnteringInfo = subworldSystem.GetMethod("BeginEntering", BindingFlags.NonPublic | BindingFlags.Static);
                     exitWorldCallbackInfo = subworldSystem.GetMethod("ExitWorldCallback", BindingFlags.NonPublic | BindingFlags.Static);
                     currentSubworldField = subworldSystem.GetField("current", BindingFlags.NonPublic | BindingFlags.Static);
