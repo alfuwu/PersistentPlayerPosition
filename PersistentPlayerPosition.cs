@@ -43,7 +43,7 @@ namespace PersistentPlayerPosition {
                 typeof(Player).GetMethod("Spawn_SetPosition", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(player, [player.SpawnX, player.SpawnY]);
             else // spawn player at world spawn
                 typeof(Player).GetMethod("Spawn_SetPositionAtWorldSpawn", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(player, []);
-            if (tag.TryGet(TagId(), out TagCompound tag2) && tag2.TryGet("facing", out int dir)) // make player face the direction they were facing when they logged off
+            if (tag != null && tag.TryGet(TagId(), out TagCompound tag2) && tag2.TryGet("facing", out int dir)) // make player face the direction they were facing when they logged off
                 player.ChangeDir(dir);
             player.fallStart = (int)player.position.Y / 16; // prevent player from dying of fall damage
         }
