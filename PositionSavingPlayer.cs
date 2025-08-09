@@ -19,6 +19,11 @@ namespace PersistentPlayerPosition {
             }
         }
 
+        public override void Initialize() {
+            // more making sure nbt data isn't null
+            LoadedNBT ??= [];
+        }
+
         public override void SaveData(TagCompound tag) {
             if (LoadedNBT != null)
                 foreach (KeyValuePair<string, object> kvp in LoadedNBT)
